@@ -23,29 +23,29 @@ ___
 ./bbuild.sh -f
 ```
 
-- To build the app:
+- To build the exampleA:
 ```bash
-./bbuild.sh -b app
+./bbuild.sh -b exampleA
 ```
 
-- To rebuild the app:
+- To rebuild the exampleA:
 ```bash
-./bbuild.sh -r app
+./bbuild.sh -r exampleA
 ```
 
-- To execute the built binary of the app:
+- To execute the built binary of the exampleA:
 ```bash
-./bbuild.sh -e app
+./bbuild.sh -e exampleA
 ```
 
-- To format, build and execute the app:
+- To format, build and execute the exampleA:
 ```bash
-./bbuild.sh -f -b -e app
+./bbuild.sh -f -b -e exampleA
 ```
 
 - Examples: 
 ```bash
-./bbuild.sh -f -b -e app # To format, build and execute the app
+./bbuild.sh -f -b -e exampleA # To format, build and execute the exampleA
 ./bbuild.sh -f -r -e test # To format, build and execute the unit tests
 ```
 
@@ -74,14 +74,15 @@ which nanopb_generator.py
 git clone git@github.com:nanopb/nanopb.git
 cd nanopb/
 git checkout <version>
-mkdir build
 cmake -S . -B build
+cmake --build build --target help
 cmake --build build
 cmake --install build --prefix ~/usr/
 sudo mv build/CMakeFiles/protobuf-nanopb-static.dir/pb*.o /usr/lib/x86_64-linux-gnu/
 ```
 - Despite this procedure, I'm getting a link error
 - The easiest approach for now was to incorporate nanopb's source into the "external" folder
+- In a future version could even make cmake create pb files on every build, which is more elegant
 
 ## Usage
 - For python code:
