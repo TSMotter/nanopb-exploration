@@ -12,10 +12,9 @@
 /* Struct definitions */
 typedef struct _Sample
 {
-    pb_callback_t channel;
-    uint32_t      frequency;
-    float         time;
-    float         value;
+    uint32_t frequency;
+    float    time;
+    float    value;
 } Sample;
 
 
@@ -25,28 +24,26 @@ extern "C"
 #endif
 
 /* Initializer values for message structs */
-#define Sample_init_default     \
-    {                           \
-        {{NULL}, NULL}, 0, 0, 0 \
+#define Sample_init_default \
+    {                       \
+        0, 0, 0             \
     }
-#define Sample_init_zero        \
-    {                           \
-        {{NULL}, NULL}, 0, 0, 0 \
+#define Sample_init_zero \
+    {                    \
+        0, 0, 0          \
     }
 
 /* Field tags (for use in manual encoding/decoding) */
-#define Sample_channel_tag 1
 #define Sample_frequency_tag 2
 #define Sample_time_tag 3
 #define Sample_value_tag 4
 
 /* Struct field encoding specification for nanopb */
 #define Sample_FIELDLIST(X, a)                   \
-    X(a, CALLBACK, SINGULAR, STRING, channel, 1) \
     X(a, STATIC, SINGULAR, UINT32, frequency, 2) \
     X(a, STATIC, SINGULAR, FLOAT, time, 3)       \
     X(a, STATIC, SINGULAR, FLOAT, value, 4)
-#define Sample_CALLBACK pb_default_field_callback
+#define Sample_CALLBACK NULL
 #define Sample_DEFAULT NULL
 
     extern const pb_msgdesc_t Sample_msg;
@@ -54,8 +51,8 @@ extern "C"
 /* Defines for backwards compatibility with code written before nanopb-0.4.0 */
 #define Sample_fields &Sample_msg
 
-    /* Maximum encoded size of messages (where known) */
-    /* Sample_size depends on runtime parameters */
+/* Maximum encoded size of messages (where known) */
+#define Sample_size 16
 
 #ifdef __cplusplus
 } /* extern "C" */

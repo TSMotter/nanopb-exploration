@@ -1,7 +1,6 @@
 syntax = "proto3";
 
 message Sample {
-    string channel = 1;
     uint32 frequency = 2;
     float time = 3;
     float value = 4;

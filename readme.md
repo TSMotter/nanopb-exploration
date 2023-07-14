@@ -78,7 +78,10 @@ mkdir build
 cmake -S . -B build
 cmake --build build
 cmake --install build --prefix ~/usr/
+sudo mv build/CMakeFiles/protobuf-nanopb-static.dir/pb*.o /usr/lib/x86_64-linux-gnu/
 ```
+- Despite this procedure, I'm getting a link error
+- The easiest approach for now was to incorporate nanopb's source into the "external" folder
 
 ## Usage
 - For python code:
