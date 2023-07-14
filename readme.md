@@ -93,3 +93,7 @@ protoc --python_out=. protocol.proto
 ```bash
 nanopb_generator.py protocol.proto
 ```
+
+# Examples:
+- ExampleA: Simplest example
+- ExampleB: Basic functionality of streams custom callbacks
