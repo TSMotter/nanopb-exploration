@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+message Sample {
+    string name = 1;
+    uint32 frequency = 2;
+    double time = 3;
+    double value = 4;
+}

@@ -1,6 +1,9 @@
 build
 .vscode
 
+*.bin
+*.hex
+
 # Prerequisites
 *.d
 

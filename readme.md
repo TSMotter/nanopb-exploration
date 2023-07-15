@@ -1,6 +1,13 @@
 # nanopb exploration
 ___
 
+# Examples:
+- ExampleA: Simplest example
+- ExampleB: Basic functionality of streams custom callbacks
+- ExampleC: Basic functionality of fields callbacks for repeated fields
+
+___
+
 ## This project uses:
 - **cmake** & **make** are used as build system
 - **clang-format** is used as formatter/code beautifier
@@ -46,7 +53,6 @@ ___
 - Examples: 
 ```bash
 ./bbuild.sh -f -b -e exampleA # To format, build and execute the exampleA
-./bbuild.sh -f -r -e test # To format, build and execute the unit tests
 ```
 
 - To generate doxygen documentation (generated docs will be available at `build/documentation/html/index.html`):
@@ -85,15 +91,14 @@ sudo mv build/CMakeFiles/protobuf-nanopb-static.dir/pb*.o /usr/lib/x86_64-linux-
 - In a future version could even make cmake create pb files on every build, which is more elegant
 
 ## Usage
-- For python code:
+- protoc usage:
 ```bash
 protoc --python_out=. protocol.proto
+protoc --decode Sample exampleC/protocol.proto < binary
 ```
-- For C code:
+- nanopb usage:
 ```bash
 nanopb_generator.py protocol.proto
 ```
-
-# Examples:
-- ExampleA: Simplest example
-- ExampleB: Basic functionality of streams custom callbacks
+- Helper tool to debug protobufs:
+    - https://protobuf-decoder.netlify.app/
