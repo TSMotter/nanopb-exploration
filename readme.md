@@ -5,6 +5,7 @@ ___
 - ExampleA: Simplest example
 - ExampleB: Basic functionality of streams custom callbacks
 - ExampleC: Basic functionality of fields callbacks for repeated fields
+- ExampleD: Basic functionality of fields callbacks for repeated fields + repeated sub messages
 
 ___
 
