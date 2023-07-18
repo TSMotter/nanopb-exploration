@@ -70,8 +70,8 @@ int main()
 
     /* Allocate space for the decoded message. */
     char   sample_d_name[25] = "";
-    Sample sample_d = {.name.arg          = sample_d_name,
-                       .name.funcs.decode = &custom_field_decoding_callback};
+    Sample sample_d          = {.name.arg          = sample_d_name,
+                                .name.funcs.decode = &custom_field_decoding_callback};
 
     /* Now we are ready to decode the message. */
     if (!pb_decode(&iStream, Sample_fields, &sample_d))

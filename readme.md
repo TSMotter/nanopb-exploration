@@ -2,10 +2,11 @@
 ___
 
 # Examples:
-- ExampleA: Simplest example
-- ExampleB: Basic functionality of streams custom callbacks
-- ExampleC: Basic functionality of fields callbacks for repeated fields
-- ExampleD: Basic functionality of fields callbacks for repeated fields + repeated sub messages
+- **ExampleA:** Simplest example;
+- **ExampleB:** Streams custom callbacks;
+- **ExampleC:** Fields callbacks for repeated fields;
+- **ExampleD:** Fields callbacks for repeated fields + repeated sub messages;
+- **ExampleE:** Protocol.options file + usage of fixed size char field;
 
 ___
 
@@ -54,11 +55,6 @@ ___
 - Examples: 
 ```bash
 ./bbuild.sh -f -b -e exampleA # To format, build and execute the exampleA
-```
-
-- To generate doxygen documentation (generated docs will be available at `build/documentation/html/index.html`):
-```bash
-./bbuild.sh -r documentation
 ```
 
 - To check all options available:
