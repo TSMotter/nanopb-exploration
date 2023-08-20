@@ -18,9 +18,10 @@ Example of samples:
 {"channel":"channel_200_20_1","frequency":200,"time":0.06832265853881836,"value":0.4162198073016087}]
 */
 
-#define COMMON_BUFFER_SIZE 512
+#define BINARY_DATA_BUFFER_SIZE 512
 #define WRITE_TO_FILE
 
+#define SAMPLES_TO_ENCODE_BUFFER_SIZE (5 * sizeof(Batch_Sample))
 #define DECODED_SAMPLES_BUFFER_SIZE (5 * sizeof(Batch_Sample))
 
 /* clang-format off */
@@ -31,19 +32,26 @@ static bool custom_istream_callback(pb_istream_t *stream, pb_byte_t *buf, size_t
 static bool custom_repeated_decoding_callback(pb_istream_t *stream, const pb_field_iter_t *field, void **arg);
 /* clang-format on */
 
-static uint8_t    common_buffer[COMMON_BUFFER_SIZE];
-static RINGBUFF_T common_rb;
 
+// RB containing raw samples that need to be encoded
+static uint8_t    samples_to_encode_buffer[SAMPLES_TO_ENCODE_BUFFER_SIZE];
+static RINGBUFF_T samples_to_encode_rb;
+
+// RB containing bytes which represent the stream of encoded samples
+static uint8_t    binary_data_buffer[BINARY_DATA_BUFFER_SIZE];
+static RINGBUFF_T binary_data_rb;
+
+// RB containing raw samples were already decoded
 static uint8_t    decoded_samples_buffer[DECODED_SAMPLES_BUFFER_SIZE];
 static RINGBUFF_T decoded_samples_rb;
 
 int main()
 {
-    RingBuffer_Init(&common_rb, common_buffer, sizeof(uint8_t), COMMON_BUFFER_SIZE);
+    RingBuffer_Init(&samples_to_encode_rb, samples_to_encode_buffer, sizeof(Batch_Sample),
+                    DECODED_SAMPLES_BUFFER_SIZE);
+    RingBuffer_Init(&binary_data_rb, binary_data_buffer, sizeof(uint8_t), BINARY_DATA_BUFFER_SIZE);
     RingBuffer_Init(&decoded_samples_rb, decoded_samples_buffer, sizeof(Batch_Sample),
                     DECODED_SAMPLES_BUFFER_SIZE);
-
-    pb_ostream_t oStream = {&custom_ostream_callback, (void *) &common_rb, COMMON_BUFFER_SIZE, 0};
 
     Batch_Sample samples_e[2] = {{.name      = "channel_2000_200_1",
                                   .frequency = 200,
@@ -53,8 +61,13 @@ int main()
                                   .frequency = 200,
                                   .time      = 0.056981563568115234,
                                   .value     = 0.3504258283522246}};
+    RingBuffer_InsertMult(&samples_to_encode_rb, samples_e,
+                          (sizeof(samples_e) / sizeof(samples_e[0])));
 
-    Batch batch_e = {.items.arg          = samples_e,
+    pb_ostream_t oStream = {&custom_ostream_callback, (void *) &binary_data_rb,
+                            BINARY_DATA_BUFFER_SIZE, 0};
+
+    Batch batch_e = {.items.arg          = &samples_to_encode_rb,
                      .items.funcs.encode = &custom_repeated_encoding_callback};
 
     if (!pb_encode(&oStream, Batch_fields, &batch_e))
@@ -66,20 +79,22 @@ int main()
     printf("Encoded size: %ld\n", total_bytes_encoded);
 
 #ifdef WRITE_TO_FILE
-    FILE  *fileb            = fopen("binary.bin", "wb");
-    size_t elements_written = fwrite(common_buffer, sizeof(uint8_t), total_bytes_encoded, fileb);
+    FILE  *fileb = fopen("binary.bin", "wb");
+    size_t elements_written =
+        fwrite(binary_data_buffer, sizeof(uint8_t), total_bytes_encoded, fileb);
     fclose(fileb);
     FILE *fileh = fopen("hexa.hex", "wb");
     for (size_t i = 0; i < total_bytes_encoded; i++)
     {
-        fprintf(fileh, "%02x", common_buffer[i]);
+        fprintf(fileh, "%02x", binary_data_buffer[i]);
     }
     fclose(fileh);
 #endif
 
     printf("--------------------------------------------------------------------\n");
 
-    pb_istream_t iStream = {&custom_istream_callback, (void *) &common_rb, COMMON_BUFFER_SIZE, 0};
+    pb_istream_t iStream = {&custom_istream_callback, (void *) &binary_data_rb,
+                            BINARY_DATA_BUFFER_SIZE, 0};
 
     /* Allocate space for the decoded message. */
     Batch batch_d = {.items.arg          = &decoded_samples_rb,
@@ -109,8 +124,12 @@ static bool custom_ostream_callback(pb_ostream_t *stream, const pb_byte_t *buf, 
 {
     RINGBUFF_T *rb = (RINGBUFF_T *) stream->state;
 
-    printf("custom_ostream_callback!-> count:%ld\n", count);
-
+    printf("custom_ostream_callback!-> count:%ld -> ", count);
+    for (int k = 0; k < count; k++)
+    {
+        printf("0x%02x, ", buf[k]);
+    }
+    printf("\n");
     return RingBuffer_InsertMult(rb, buf, count) == count;
 }
 
@@ -119,9 +138,11 @@ static bool custom_repeated_encoding_callback(pb_ostream_t *stream, const pb_fie
 {
     printf("custom_repeated_encoding_callback!-> tag:%d\n", field->tag);
 
-    Batch_Sample *samples = (Batch_Sample *) *arg;
+    // Batch_Sample *samples = (Batch_Sample *) *arg;
+    RINGBUFF_T *rb = (RINGBUFF_T *) *arg;
 
-    for (uint16_t k = 0; k < 2; k++)
+    size_t num_samples = RingBuffer_GetCount(rb);
+    for (uint16_t k = 0; k < num_samples; k++)
     {
         if (!pb_encode_tag_for_field(stream, field))
         {
@@ -130,7 +151,9 @@ static bool custom_repeated_encoding_callback(pb_ostream_t *stream, const pb_fie
             return false;
         }
 
-        if (!pb_encode_submessage(stream, Batch_Sample_fields, &samples[k]))
+        Batch_Sample s = {};
+        RingBuffer_Pop(rb, &s);
+        if (!pb_encode_submessage(stream, Batch_Sample_fields, &s))
         {
             const char *error = PB_GET_ERROR(stream);
             printf("pb_encode error: %s\n", error);
@@ -145,7 +168,8 @@ static bool custom_istream_callback(pb_istream_t *stream, pb_byte_t *buf, size_t
 {
     RINGBUFF_T *rb = (RINGBUFF_T *) stream->state;
 
-    printf("custom_istream_callback!-> count:%ld, *buf:%02x\n", count, *buf);
+    printf("custom_istream_callback!-> count:%ld -> ", count);
+
 
     if (RingBuffer_IsEmpty(rb))
     {
@@ -154,7 +178,13 @@ static bool custom_istream_callback(pb_istream_t *stream, pb_byte_t *buf, size_t
         return false;
     }
 
-    return RingBuffer_PopMult(rb, buf, count) == count;
+    bool status = RingBuffer_PopMult(rb, buf, count) == count;
+    for (int k = 0; k < count; k++)
+    {
+        printf("0x%02x, ", buf[k]);
+    }
+    printf("\n");
+    return status;
 }
 
 static bool custom_repeated_decoding_callback(pb_istream_t *stream, const pb_field_iter_t *field,
