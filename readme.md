@@ -7,6 +7,7 @@ ___
 - **ExampleC:** Fields callbacks for repeated fields;
 - **ExampleD:** Fields callbacks for repeated fields + repeated sub messages;
 - **ExampleE:** Protocol.options file + usage of fixed size char field;
+- **ExampleF:** Use HDLC protocol to control message framing where the message peayload is protobuf encoded;
 
 ___
 
@@ -16,6 +17,8 @@ ___
 - **doxygen** is used to generate documentation
 - **gtest** is downloaded in build-time into the `build/_deps` folder and provides infrastructure for unit tests
     - Link: [github.com/google/googletest](https://github.com/google/googletest)
+- **yahdlc** is used as HDLC protocol library.
+    - Link: [yahdlc - Yet Another HDLC](https://github.com/bang-olufsen/yahdlc/tree/master)
 
 ### Versions present in development machine:
 - **cmake:** cmake version 3.22.1
@@ -23,6 +26,7 @@ ___
 - **clang-format:** Ubuntu clang-format version 14.0.0-1ubuntu1
 - **doxygen:** 1.9.1
 - **gtest:** 1.13.0
+- **yahdlc** 1.1
 
 ___
 
@@ -54,7 +58,7 @@ ___
 
 - Examples: 
 ```bash
-./bbuild.sh -f -b -e exampleA # To format, build and execute the exampleA
+./bbuild.sh -v -f -b -e exampleA # To format, build and execute the exampleA with verbose
 ```
 
 - To check all options available:
