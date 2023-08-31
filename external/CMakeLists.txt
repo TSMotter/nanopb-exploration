@@ -1,6 +1,2 @@
-file(GLOB my_glob
-    "*.h"
-    "*.c"
-)
-
-add_library(nanopb ${my_glob})
+add_subdirectory(nanopb)
+add_subdirectory(yahdlc)
