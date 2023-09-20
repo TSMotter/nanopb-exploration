@@ -5,7 +5,6 @@ add_library(protocolpb protocol.pb.c protocol.pb.h)
 # Make the directory known
 target_include_directories(main PUBLIC
     ${CMAKE_SOURCE_DIR}/external
-    ${CMAKE_SOURCE_DIR}/lib
 )
 
 # Link library to a binary target

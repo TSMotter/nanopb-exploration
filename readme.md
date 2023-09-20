@@ -14,19 +14,16 @@ ___
 ## This project uses:
 - **cmake** & **make** are used as build system
 - **clang-format** is used as formatter/code beautifier
-- **doxygen** is used to generate documentation
-- **gtest** is downloaded in build-time into the `build/_deps` folder and provides infrastructure for unit tests
-    - Link: [github.com/google/googletest](https://github.com/google/googletest)
 - **yahdlc** is used as HDLC protocol library.
     - Link: [yahdlc - Yet Another HDLC](https://github.com/bang-olufsen/yahdlc/tree/master)
+- **nanopb** is used as a C implementation of Google's protobuf
 
 ### Versions present in development machine:
 - **cmake:** cmake version 3.22.1
 - **make:** GNU Make 4.3
 - **clang-format:** Ubuntu clang-format version 14.0.0-1ubuntu1
-- **doxygen:** 1.9.1
-- **gtest:** 1.13.0
 - **yahdlc** 1.1
+- **nanopb** nanopb-0.4.5
 
 ___
 
@@ -80,7 +77,7 @@ which nanopb_generator.py
 ```bash
 git clone git@github.com:nanopb/nanopb.git
 cd nanopb/
-git checkout <version>
+git checkout nanopb-0.4.5
 cmake -S . -B build
 cmake --build build --target help
 cmake --build build

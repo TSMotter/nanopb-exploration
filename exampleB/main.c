@@ -5,7 +5,7 @@
 
 #include "protocol.pb.h"
 
-#include "ring_buffer.h"
+#include "ring_buffer/ring_buffer.h"
 
 /*
 {"channel":"channel_200_20_1","frequency":200,"time":0.051526546478271484,"value":0.31812476943300294}
@@ -67,7 +67,7 @@ static bool custom_ostream_callback(pb_ostream_t *stream, const pb_byte_t *buf, 
 {
     RINGBUFF_T *rb = (RINGBUFF_T *) stream->state;
 
-    printf("custom_ostream_callback!-> count:%d, *buf:%02x\n", count, *buf);
+    printf("custom_ostream_callback!-> count:%ld, *buf:%02x\n", count, *buf);
 
     return RingBuffer_InsertMult(rb, buf, count) == count;
 }
@@ -76,7 +76,7 @@ static bool custom_istream_callback(pb_istream_t *stream, pb_byte_t *buf, size_t
 {
     RINGBUFF_T *rb = (RINGBUFF_T *) stream->state;
 
-    printf("custom_istream_callback!-> count:%d, *buf:%02x\n", count, *buf);
+    printf("custom_istream_callback!-> count:%ld, *buf:%02x\n", count, *buf);
 
     if (RingBuffer_IsEmpty(rb))
     {

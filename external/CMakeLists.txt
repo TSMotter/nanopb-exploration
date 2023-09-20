@@ -1,2 +1,3 @@
 add_subdirectory(nanopb)
 add_subdirectory(yahdlc)
+add_subdirectory(ring_buffer)
