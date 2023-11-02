@@ -1,16 +1,33 @@
-# Add a cmake binary taget (in this case, an executable)
+# ******************************************************************************
+# **** Creates binary targets ****
+# ******************************************************************************
+# In this case, an executable
 add_executable(main main.c)
-add_library(protocolpb protocol.pb.c protocol.pb.h)
+# In this case, a library
+add_library(protocolpb
+            protocol.pb.c
+            protocol.pb.h)
 
-# Make the directory known
-target_include_directories(main PUBLIC
-    ${CMAKE_SOURCE_DIR}/external
-)
+# ******************************************************************************
+# **** Make other directories known the targets ****
+# ******************************************************************************
+target_include_directories(main PRIVATE
+                           ${CMAKE_SOURCE_DIR}/lib
+                           ${CMAKE_SOURCE_DIR}/external/nanopb
+                           ${CMAKE_SOURCE_DIR}/external/ring_buffer
+                           ${CMAKE_SOURCE_DIR}/external/yahdlc)
+target_include_directories(protocolpb PRIVATE
+                           ${CMAKE_SOURCE_DIR}/external/nanopb)
 
-# Link library to a binary target
+# ******************************************************************************
+# **** Link the libraries ****
+# ******************************************************************************
+target_link_libraries(protocolpb PRIVATE
+                      pbh)
 target_link_libraries(main PRIVATE
-    protocolpb
-    nanopb
-    yahdlc
-    ring_buffer
-)
+                      file_writer
+                      protocolpb
+                      pb_encode
+                      pb_decode
+                      ring_buffer
+                      yahdlc)

@@ -1,9 +1,9 @@
 #include <stdio.h>
 
+#include "protocol.pb.h"
+#include "file_writer.h"
 #include "pb_encode.h"
 #include "pb_decode.h"
-
-#include "protocol.pb.h"
 
 /*
 {"channel":"channel_200_20_1","frequency":200,"time":0.051526546478271484,"value":0.31812476943300294}
@@ -34,6 +34,9 @@ int main()
     size_t total_bytes_encoded = oStream.bytes_written;
     printf("Encoded size: %ld\n", total_bytes_encoded);
 
+    write_binary_file("protobuf_payload.bin", common_buffer, total_bytes_encoded);
+    write_hex_file("protobuf_payload.hex", common_buffer, total_bytes_encoded);
+
     printf("--------------------------------------------------------------------\n");
 
     /* Allocate space for the decoded message. */
@@ -49,7 +52,9 @@ int main()
         return 1;
     }
 
+    printf("~~~~Sample Recovered:~~~~\n");
     printf("sample_d.frequency: %d\n", sample_d.frequency);
     printf("sample_d.time: %f\n", sample_d.time);
     printf("sample_d.value: %f\n", sample_d.value);
+    printf("~~~~~~~~~~~~~~~~~~~~~~~~~\n");
 }

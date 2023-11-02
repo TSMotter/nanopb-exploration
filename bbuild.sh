@@ -5,6 +5,7 @@ global_flag_f_format=0
 global_flag_b_build=0
 global_flag_r_rebuild=0
 global_flag_e_execute=0
+global_flag_c_clean=0
 global_flag_v_verbose=0
 global_value_target=""
 
@@ -25,6 +26,7 @@ function print_help()
     -b, --build         [b]uild
     -r, --rebuild       [r]euild
     -e, --execute       [e]xecute
+    -c, --clean         [c]lean
     -v, --verbose       [v]erbose
 
     targets:
@@ -124,6 +126,20 @@ function func_execute()
 ################################################################################
 
 #
+# Clean workspace
+#
+function func_clean()
+{
+    print_banner "Cleaning workspace"
+
+    rm -rf build
+    rm -rf *.bin
+    rm -rf *.hex
+}
+
+################################################################################
+
+#
 # Gather all params passed to the script
 #
 function gather_params()
@@ -146,6 +162,10 @@ function gather_params()
                 global_flag_e_execute=1
                 shift
                 ;;
+            -c | --clean)
+                global_flag_c_clean=1
+                shift
+                ;;
             -v | --verbose)
                 global_flag_v_verbose=1
                 shift
@@ -161,7 +181,9 @@ function gather_params()
         esac
     done
 
-    if [[ global_flag_f_format -eq 0 ]]; then
+    # Allow only format or clean without specifying <target>
+    #if [ global_flag_f_format -eq 0 ] && [ global_flag_c_clean -eq 0 ]; then
+    if [ "$global_flag_f_format" -eq 0 ] && [ "$global_flag_c_clean" -eq 0 ]; then
         if [[ -z "$global_value_target" ]]; then
             echo "Please, define a <target>"
             print_help
@@ -177,6 +199,9 @@ function gather_params()
 #
 function execute_logic()
 {
+    if [[ global_flag_c_clean -eq 1 ]]; then
+        func_clean
+    fi
     if [[ global_flag_f_format -eq 1 ]]; then
         func_format
     fi

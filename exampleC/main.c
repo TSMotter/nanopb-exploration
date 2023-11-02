@@ -1,11 +1,10 @@
 #include <stdio.h>
 
+#include "protocol.pb.h"
+#include "file_writer.h"
 #include "pb_encode.h"
 #include "pb_decode.h"
-
-#include "protocol.pb.h"
-
-#include "ring_buffer/ring_buffer.h"
+#include "ring_buffer.h"
 
 /*
 Example of samples:
@@ -20,13 +19,12 @@ Example of samples:
 
 #define COMMON_BUFFER_SIZE 512
 
+/* clang-format off */
 static bool custom_ostream_callback(pb_ostream_t *stream, const pb_byte_t *buf, size_t count);
-static bool custom_field_encoding_callback(pb_ostream_t *stream, const pb_field_iter_t *field,
-                                           void *const *arg);
-
+static bool custom_field_encoding_callback(pb_ostream_t *stream, const pb_field_iter_t *field, void *const *arg);
 static bool custom_istream_callback(pb_istream_t *stream, pb_byte_t *buf, size_t count);
-static bool custom_field_decoding_callback(pb_istream_t *stream, const pb_field_iter_t *field,
-                                           void **arg);
+static bool custom_field_decoding_callback(pb_istream_t *stream, const pb_field_iter_t *field, void **arg);
+/* clang-format on */
 
 static uint8_t    common_buffer[COMMON_BUFFER_SIZE];
 static RINGBUFF_T common_rb;
@@ -51,17 +49,8 @@ int main()
     size_t total_bytes_encoded = oStream.bytes_written;
     printf("Encoded size: %ld\n", total_bytes_encoded);
 
-#ifdef WRITE_TO_FILE
-    FILE  *fileb            = fopen("binary.bin", "wb");
-    size_t elements_written = fwrite(common_buffer, sizeof(uint8_t), total_bytes_encoded, fileb);
-    fclose(fileb);
-    FILE *fileh = fopen("hexa.hex", "wb");
-    for (size_t i = 0; i < total_bytes_encoded; i++)
-    {
-        fprintf(fileh, "%02x", common_buffer[i]);
-    }
-    fclose(fileh);
-#endif
+    write_binary_file("protobuf_payload.bin", common_buffer, total_bytes_encoded);
+    write_hex_file("protobuf_payload.hex", common_buffer, total_bytes_encoded);
 
     printf("--------------------------------------------------------------------\n");
 
@@ -80,10 +69,12 @@ int main()
         return 1;
     }
 
+    printf("~~~~Sample Recovered:~~~~\n");
     printf("sample_d.name: %s\n", sample_d_name);
     printf("sample_d.frequency: %d\n", sample_d.frequency);
     printf("sample_d.time: %f\n", sample_d.time);
     printf("sample_d.value: %f\n", sample_d.value);
+    printf("~~~~~~~~~~~~~~~~~~~~~~~~~\n");
 }
 
 

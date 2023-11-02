@@ -1,12 +1,12 @@
 #include <stdio.h>
 
+#include "protocol.pb.h"
+#include "file_writer.h"
 #include "pb_encode.h"
 #include "pb_decode.h"
-#include "yahdlc/yahdlc.h"
+#include "yahdlc.h"
+#include "ring_buffer.h"
 
-#include "protocol.pb.h"
-
-#include "ring_buffer/ring_buffer.h"
 
 /*
 Example of samples:
@@ -20,19 +20,14 @@ Example of samples:
 */
 
 #define BINARY_DATA_BUFFER_SIZE 256
-#define WRITE_TO_FILE
-
+#define HDLC_FRAME_BUFFER_SIZE (BINARY_DATA_BUFFER_SIZE + 64)
 #define SAMPLES_TO_ENCODE_BUFFER_SIZE (5 * sizeof(Batch_Sample))
 #define DECODED_SAMPLES_BUFFER_SIZE (5 * sizeof(Batch_Sample))
 
-#define HDLC_FRAME_BUFFER_SIZE (BINARY_DATA_BUFFER_SIZE + 64)
-
 /* clang-format off */
 static bool custom_repeated_encoding_callback(pb_ostream_t *stream, const pb_field_iter_t *field, void *const *arg);
-
 static bool custom_repeated_decoding_callback(pb_istream_t *stream, const pb_field_iter_t *field, void **arg);
 /* clang-format on */
-
 
 // RB containing raw samples that need to be encoded
 static uint8_t    samples_to_encode_buffer[SAMPLES_TO_ENCODE_BUFFER_SIZE];
@@ -100,31 +95,11 @@ int main()
     }
     printf("HDLC frame size: %d\n", e_hdlc_frame_len);
 
-#ifdef WRITE_TO_FILE
+    write_binary_file("protobuf_payload.bin", protobuf_binary_payload_buffer, total_bytes_encoded);
+    write_hex_file("protobuf_payload.hex", protobuf_binary_payload_buffer, total_bytes_encoded);
 
-    FILE  *file_b_proto = fopen("protobuf_binary.bin", "wb");
-    size_t foo =
-        fwrite(protobuf_binary_payload_buffer, sizeof(uint8_t), total_bytes_encoded, file_b_proto);
-    fclose(file_b_proto);
-
-    FILE *file_h_proto = fopen("protobuf_hexa.hex", "wb");
-    for (size_t i = 0; i < total_bytes_encoded; i++)
-    {
-        fprintf(file_h_proto, "%02x", protobuf_binary_payload_buffer[i]);
-    }
-    fclose(file_h_proto);
-
-    FILE  *file_b_hdlc = fopen("hdlc_binary_frame.bin", "wb");
-    size_t bar = fwrite(e_hdlc_frame_buffer, sizeof(uint8_t), e_hdlc_frame_len, file_b_hdlc);
-    fclose(file_b_hdlc);
-
-    FILE *file_h_hdlc = fopen("hdlc_hexa_frame.hex", "wb");
-    for (size_t i = 0; i < e_hdlc_frame_len; i++)
-    {
-        fprintf(file_h_hdlc, "%02x", e_hdlc_frame_buffer[i]);
-    }
-    fclose(file_h_hdlc);
-#endif
+    write_binary_file("hdlc_frame.bin", e_hdlc_frame_buffer, e_hdlc_frame_len);
+    write_hex_file("hdlc_frame.hex", e_hdlc_frame_buffer, e_hdlc_frame_len);
 
     printf("--------------------------------------------------------------------\n");
 
@@ -161,12 +136,12 @@ int main()
             {
                 Batch_Sample sample_d = {};
                 RingBuffer_Pop(&decoded_samples_rb, &sample_d);
-                printf("~~~~~~~~~~~~~~~\n");
+                printf("~~~~Sample Recovered:~~~~\n");
                 printf("sample_d.name: %s\n", sample_d.name);
                 printf("sample_d.frequency: %d\n", sample_d.frequency);
                 printf("sample_d.time: %f\n", sample_d.time);
                 printf("sample_d.value: %f\n", sample_d.value);
-                printf("~~~~~~~~~~~~~~~\n");
+                printf("~~~~~~~~~~~~~~~~~~~~~~~~~\n");
             }
         }
     }

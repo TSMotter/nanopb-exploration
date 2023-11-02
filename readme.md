@@ -1,33 +1,37 @@
 # nanopb exploration
-___
 
-# Examples:
+- This repository is a sandbox for exploring nanopb's functionalities and getting a better grasp on how it works.
+- The exploration happens through the implementation of a handful of very verbose examples
+- Each Example is a slightly more complex usecase then the previous one.
+    - Even if your use case is simple, it's recommended to check the later examples for they might use more elegant and better fitting approaches for your usecase.
+- All examples, when executed, generate binary files whose content represent the protobuf payload.
+    - These files can be used with `protoc --decode` option to debug as is explained in section [Usage and troubleshooting](#Usage-and-troubleshooting)
+
+## Examples:
 - **ExampleA:** Simplest example;
 - **ExampleB:** Streams custom callbacks;
 - **ExampleC:** Fields callbacks for repeated fields;
 - **ExampleD:** Fields callbacks for repeated fields + repeated sub messages;
 - **ExampleE:** Protocol.options file + usage of fixed size char field;
-- **ExampleF:** Use HDLC protocol to control message framing where the message peayload is protobuf encoded;
+- **ExampleF:** Use HDLC protocol to control message framing where the message payload is protobuf encoded;
 
-___
 
 ## This project uses:
 - **cmake** & **make** are used as build system
+    - cmake version 3.22.1
+    - GNU Make 4.3
 - **clang-format** is used as formatter/code beautifier
-- **yahdlc** is used as HDLC protocol library.
-    - Link: [yahdlc - Yet Another HDLC](https://github.com/bang-olufsen/yahdlc/tree/master)
-- **nanopb** is used as a C implementation of Google's protobuf
+    - Ubuntu clang-format version 14.0.0-1ubuntu1
+- **yahdlc** is used as HDLC protocol library (already contained in the 'external' folder)
+    - 1.1
+- **nanopb** is used as a C implementation of Google's protobuf (already contained in the 'external' folder)
+    - nanopb-0.4.5
+- An NXP ring_buffer implementation is also imported into the workspace (already contained in the 'external' folder)
 
-### Versions present in development machine:
-- **cmake:** cmake version 3.22.1
-- **make:** GNU Make 4.3
-- **clang-format:** Ubuntu clang-format version 14.0.0-1ubuntu1
-- **yahdlc** 1.1
-- **nanopb** nanopb-0.4.5
 
-___
-
-## How to operate the repository
+## How to compile and run the examples
+- If you wish to use docker, build the image and launch it using the helper scripts inside of the `docker` folder
+- The repository can be operated outside of the docker container if all the dependencies are met 
 - To format the complete code base with clang-format:
 ```bash
 ./bbuild.sh -f
@@ -63,9 +67,9 @@ ___
 ./bbuild.sh --help
 ```
 
-___
 
-## Installation
+## Dealing with nanopb and protobuf
+### Installation
 - Installs nanopb generator script and protoc
 ```bash
 sudo apt-get update
@@ -73,26 +77,12 @@ sudo apt-get install nanopb
 which protoc
 which nanopb_generator.py 
 ```
-- Installs nanopb libraries in the system
-```bash
-git clone git@github.com:nanopb/nanopb.git
-cd nanopb/
-git checkout nanopb-0.4.5
-cmake -S . -B build
-cmake --build build --target help
-cmake --build build
-cmake --install build --prefix ~/usr/
-sudo mv build/CMakeFiles/protobuf-nanopb-static.dir/pb*.o /usr/lib/x86_64-linux-gnu/
-```
-- Despite this procedure, I'm getting a link error
-- The easiest approach for now was to incorporate nanopb's source into the "external" folder
-- In a future version could even make cmake create pb files on every build, which is more elegant
 
-## Usage
+### Usage and troubleshooting
 - protoc usage:
 ```bash
 protoc --python_out=. protocol.proto
-protoc --decode Sample exampleC/protocol.proto < binary
+protoc --decode Sample exampleC/protocol.proto < protobuf_payload.bin
 ```
 - nanopb usage:
 ```bash
